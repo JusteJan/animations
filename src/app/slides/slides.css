@@ -1,0 +1,70 @@
+/* app.component.css */
+.type-1 {
+  background: linear-gradient(135deg, #0A2463 0%, #3E92CC 100%)
+}
+
+.type-2 {
+  background: linear-gradient(135deg, #3E92CC 0%, #FFFAFF 100%)}
+
+.type-3 {
+  background: linear-gradient(135deg, #FFFAFF 0%, #D8315B 100%)
+}
+
+.type-4 {
+  background: linear-gradient(135deg, #D8315B 0%, #1E1B18 100%)
+}
+
+.type-5 {
+  background: linear-gradient(135deg, #1E1B18 0%, #0A2463 100%)
+}
+
+.scroll-section {
+  height: 100vh; /* Make each section fill the viewport */
+  position: relative;
+  display: flex;
+  align-items: flex-end; /* Align the content to the bottom */
+  justify-content: center;
+  overflow: hidden; /* Only to clip the text as it slides in, NOT on the body */
+}
+
+.section-content {
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+
+/*Uncomment for automatic slide*/
+/*.section-text {*/
+/*  !* Initial state: positioned at the bottom of the section-content,*/
+/*     but translated 100% of its own height to be outside the viewport *!*/
+/*  position: absolute;*/
+/*  bottom: 0;*/
+/*  left: 50%;*/
+/*  transform: translate(-50%, 100%); !* Center horizontally and push down *!*/
+/*  opacity: 0;*/
+/*  padding: 20px;*/
+/*  color: white; !* Example text color *!*/
+/*  font-size: 3em;*/
+/*  text-align: center;*/
+/*}*/
+
+.section-text {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 100%);
+  opacity: 0;
+  transition: none; /* Important: disable CSS transitions */
+}
+
+/* 1. Ensure the scrollbar is always visible on the document root */
+html {
+  overflow-y: scroll; /* Forces the vertical scrollbar to always show */
+}
+
+/* 2. Ensure the body spans the full width, preventing double scrollbars */
+body {
+  overflow-x: hidden;
+  margin: 0; /* Important: removes default margin */
+}
