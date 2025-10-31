@@ -1,11 +1,10 @@
 .slide-container {
   position: relative;
-  height: 200vh; // enough height for pin + text scroll
-}
+  height: var(--container-height, 200vh);}
 
 .slide-inner {
   position: sticky;
-  top: 0;
+  top: var(--inner-top, 0);
   height: 100vh; // pinned height
   background-size: cover;
   background-position: center;

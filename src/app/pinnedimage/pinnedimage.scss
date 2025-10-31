@@ -1,7 +1,6 @@
 .slide-container {
   position: relative;
-  height: 200vh; // enough height for pin + text scroll
-}
+  height: var(--container-height, 200vh);}
 
 .text-container {
   display: flex;

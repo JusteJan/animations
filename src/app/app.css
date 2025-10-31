@@ -35,3 +35,15 @@
   padding-top: 200vh;
   position: relative;
 }
+
+.reveal-slide {
+  z-index: -1;
+  position: relative;
+  top: -200vh;
+}
+
+.reveal-slide-top {
+  z-index: -1;
+  position: relative;
+  top: -100vh;
+}

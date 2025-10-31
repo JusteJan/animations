@@ -21,12 +21,46 @@
   <app-pinnedimage
     background="#2c3e50"
     text="Second slide with a color background."
+    [animationStyle]="'reveal-exit'"
+    style="--container-height: 300vh;"
   ></app-pinnedimage>
 
-  <app-slide
+<!--  <app-slide-->
+<!--    background="url('https://picsum.photos/id/1015/1200/800')"-->
+<!--    text="This is the first story text that scrolls over the slide."-->
+<!--    [animationStyle]="'reveal-enter'"-->
+<!--    style="&#45;&#45;container-height: 300vh;&#45;&#45;inner-top:-200vh"-->
+<!--  ></app-slide>-->
+
+<app-slide class="reveal-slide"
     background="url('https://picsum.photos/id/1015/1200/800')"
     text="This is the first story text that scrolls over the slide."
-  ></app-slide>
+           style="--container-height: 300vh;"
+           [animationStyle]="'reveal-enter'"
+
+></app-slide>
+
+<app-pinnedimage
+  background="#2c3e50"
+  text="Second slide with a color background."
+  [animationStyle]="'reveal-exit'"
+  style="--container-height: 300vh;"
+></app-pinnedimage>
+
+<!--  <app-slide-->
+<!--    background="url('https://picsum.photos/id/1015/1200/800')"-->
+<!--    text="This is the first story text that scrolls over the slide."-->
+<!--    [animationStyle]="'reveal-enter'"-->
+<!--    style="&#45;&#45;container-height: 300vh;&#45;&#45;inner-top:-200vh"-->
+<!--  ></app-slide>-->
+
+<app-slide class="reveal-slide-top"
+           background="url('https://picsum.photos/id/1015/1200/800')"
+           text="This is the first story text that scrolls over the slide."
+           style="--container-height: 200vh;"
+           [animationStyle]="'reveal-enter'"
+
+></app-slide>
 
 
 
