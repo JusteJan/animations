@@ -36,14 +36,14 @@
   position: relative;
 }
 
-.reveal-slide {
-  z-index: -1;
-  position: relative;
-  margin-top: -200vh;
-}
+/*.reveal-slide {*/
+/*  z-index: -1;*/
+/*  position: relative;*/
+/*  margin-top: -200vh;*/
+/*}*/
 
-.reveal-slide-top {
-  z-index: 1;
-  position: relative;
-  margin-top: -100vh;
-}
+/*.reveal-slide-top {*/
+/*  z-index: 1;*/
+/*  position: relative;*/
+/*  margin-top: -100vh;*/
+/*}*/

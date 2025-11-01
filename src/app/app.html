@@ -2,66 +2,152 @@
 <!--<app-old-slides></app-old-slides>-->
 <div class="menu">MENU</div>
 
-  <app-slide
-    background="url('https://picsum.photos/id/1015/1200/800')"
-    text="This is the first story text that scrolls over the slide."
-  ></app-slide>
+<!--  <app-slide-->
+<!--    background="url('https://picsum.photos/id/1015/1200/800')"-->
+<!--    text="This is the first story text that scrolls over the slide."-->
+<!--  ></app-slide>-->
 
-  <app-pinnedimage
-    background="#2c3e50"
-    text="Second slide with a color background."
-    [animationStyle]="'reveal-exit'"
-    style="--container-height: 300vh;"
-  ></app-pinnedimage>
-<app-slide class="reveal-slide"
-    background="url('https://picsum.photos/id/1015/1200/800')"
-    text="This is the first story text that scrolls over the slide."
-           style="--container-height: 300vh;"
-           [animationStyle]="'reveal-enter'"
+<!--  <app-pinnedimage-->
+<!--    background="#2c3e50"-->
+<!--    text="Second slide with a color background."-->
+<!--    [animationStyle]="'reveal-exit'"-->
+<!--    style="&#45;&#45;container-height: 300vh;"-->
+<!--  ></app-pinnedimage>-->
+<!--<app-slide class="reveal-slide"-->
+<!--    background="url('https://picsum.photos/id/1015/1200/800')"-->
+<!--    text="This is the first story text that scrolls over the slide."-->
+<!--           style="&#45;&#45;container-height: 300vh;"-->
+<!--           [animationStyle]="'reveal-enter'"-->
 
-></app-slide>
+<!--&gt;</app-slide>-->
 
-<app-pinnedimage
+<!--<app-pinnedimage-->
+<!--  background="#2c3e50"-->
+<!--  text="Second slide with a color background."-->
+<!--  [animationStyle]="'reveal-exit'"-->
+<!--  style="&#45;&#45;container-height: 300vh;"-->
+<!--&gt;</app-pinnedimage>-->
+
+<!--<app-slide class="reveal-slide"-->
+<!--           background="url('https://picsum.photos/id/1015/1200/800')"-->
+<!--           text="This is the first story text that scrolls over the slide."-->
+<!--           style="&#45;&#45;container-height: 300vh;"-->
+<!--           [animationStyle]="'reveal-enter'"-->
+
+<!--&gt;</app-slide>-->
+
+<!--<app-pinnedimage-->
+<!--  background="#2c3e50"-->
+<!--  text="Second slide with a color background."-->
+<!--&gt;</app-pinnedimage>-->
+
+<!--<app-slide-->
+<!--           background="url('https://picsum.photos/id/1015/1200/800')"-->
+<!--           text="This is the first story text that scrolls over the slide."-->
+
+<!--&gt;</app-slide>-->
+
+<!--<app-pinnedimage-->
+<!--  background="#2c3e50"-->
+<!--  text="Second slide with a color background."-->
+<!--  [animationStyle]="'reveal-top-exit'"-->
+<!--  style="&#45;&#45;container-height: 300vh;"-->
+<!--&gt;</app-pinnedimage>-->
+
+
+<!--<app-slide class="reveal-slide-top"-->
+<!--           background="url('https://picsum.photos/id/1015/1200/800')"-->
+<!--           text="This is the first story text that scrolls over the slide."-->
+<!--           style="&#45;&#45;container-height: 200vh;"-->
+<!--           [animationStyle]="'reveal-top-enter'"-->
+
+<!--&gt;</app-slide>-->
+
+<app-animated-slide-dragging-text
+  backgroundImage="'images/billy-huynh-W8KTS-mhFUE-unsplash.jpg'"
+  text="This is the first story text that scrolls over the slide."
+></app-animated-slide-dragging-text>
+
+<app-animated-slide-pinned-image-dragging-text
   background="#2c3e50"
   text="Second slide with a color background."
-  [animationStyle]="'reveal-exit'"
+  [exit]="'reveal-exit'"
+  image="images/xinqiao-wang-wPRthjNrGaY-unsplash.jpg"
   style="--container-height: 300vh;"
-></app-pinnedimage>
+></app-animated-slide-pinned-image-dragging-text>
 
-<app-slide class="reveal-slide"
-           background="url('https://picsum.photos/id/1015/1200/800')"
+<app-animated-slide-dragging-text
+  backgroundImage="images/steve-busch-PkvnkMrnLFo-unsplash.jpg"
            text="This is the first story text that scrolls over the slide."
-           style="--container-height: 300vh;"
-           [animationStyle]="'reveal-enter'"
+           [enter]="'reveal-enter'"
 
-></app-slide>
+></app-animated-slide-dragging-text>
 
-<app-pinnedimage
+<app-animated-slide-pinned-image-dragging-text
   background="#2c3e50"
   text="Second slide with a color background."
-></app-pinnedimage>
+  [exit]="'reveal-exit'"
+  image="images/slava-auchynnikau-DjPMpSqHxPs-unsplash.jpg"
+></app-animated-slide-pinned-image-dragging-text>
 
-<app-slide
-           background="url('https://picsum.photos/id/1015/1200/800')"
+<app-animated-slide-dragging-text
+  backgroundImage="images/marco-d-abramo-U41hNCYjWdM-unsplash.jpg"
            text="This is the first story text that scrolls over the slide."
+           [enter]="'reveal-enter'"
 
-></app-slide>
+></app-animated-slide-dragging-text>
 
-<app-pinnedimage
+<app-animated-slide-pinned-image-dragging-text
   background="#2c3e50"
   text="Second slide with a color background."
-  [animationStyle]="'reveal-top-exit'"
-  style="--container-height: 300vh;"
-></app-pinnedimage>
+  image="images/jessica-brown-Hw9XTtRUXgM-unsplash.jpg"
+></app-animated-slide-pinned-image-dragging-text>
+
+<app-animated-slide-dragging-text
+  backgroundImage="images/ingmar-ft7NpsXuAO4-unsplash.jpg"
+  text="This is the first story text that scrolls over the slide."
+
+></app-animated-slide-dragging-text>
+
+<app-animated-slide-pinned-image-dragging-text
+  background="#2c3e50"
+  text="Second slide with a color background."
+  image="images/evgeni-tcherkasski-Ju7ZiCwu3DU-unsplash.jpg"
+  [exit]="'reveal-top-exit'"
+></app-animated-slide-pinned-image-dragging-text>
 
 
-<app-slide class="reveal-slide-top"
-           background="url('https://picsum.photos/id/1015/1200/800')"
+<app-animated-slide-dragging-text
+  backgroundImage="images/eric-stoynov-Asi4unAq4us-unsplash.jpg"
            text="This is the first story text that scrolls over the slide."
-           style="--container-height: 200vh;"
-           [animationStyle]="'reveal-top-enter'"
+           [enter]="'reveal-enter-top'"
+           [exit]="'reveal-top-exit'"
 
-></app-slide>
+></app-animated-slide-dragging-text>
+
+<app-animated-slide-pinned-image-dragging-text
+  background="#2c3e50"
+  text="Second slide with a color background."
+  [enter]="'reveal-enter-top'"
+  [exit]="'reveal-top-exit'"
+  image="images/deep-doshi-U_Pjpti-LzM-unsplash.jpg"
+></app-animated-slide-pinned-image-dragging-text>
+
+<app-animated-slide-dragging-text
+  backgroundImage="images/abdul-quadir-RHOA-WA3FtA-unsplash.jpg"
+  text="This is the first story text that scrolls over the slide."
+  [enter]="'reveal-enter-top'"
+  [exit]="'reveal-exit'"
+
+></app-animated-slide-dragging-text>
+
+<app-animated-slide-pinned-image-dragging-text
+  background="#2c3e50"
+  text="Second slide with a color background."
+  [enter]="'reveal-enter'"
+  image="images/boliviainteligente-LigxC7tE5e4-unsplash.jpg"
+
+></app-animated-slide-pinned-image-dragging-text>
 
 
 
