@@ -6,11 +6,11 @@
 :host(.reveal-slide) {
   z-index: var(--z-index, -1);
   position: relative;
-  margin-top: -200vh;
+  margin-top: var(--margin-reveal, -200vh);
 }
 
 :host(.reveal-slide-top) {
   z-index: var(--z-index, 1);
   position: relative;
-  margin-top: -100vh;
+  margin-top: var(--margin-reveal, -100vh);
 }

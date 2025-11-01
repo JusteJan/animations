@@ -14,7 +14,6 @@ import {NgStyle} from '@angular/common';
 
 @Directive({})
 export class GenericAnimatedSlide implements AfterViewInit {
-
   isAnimated = input<boolean>(true);
   enter = input<null | 'reveal-enter' | 'reveal-enter-top'>(null);
   exit = input<null | 'reveal-exit' | 'reveal-top-exit'>(null);
@@ -23,7 +22,13 @@ export class GenericAnimatedSlide implements AfterViewInit {
   text = input.required<string>();
   zindex = input<number | null>(null);
   element = inject(ElementRef);
-  protected viewportMultiplier = computed<number>(() => (this.exit() === 'reveal-exit' || this.exit() === 'reveal-top-exit' || this.enter() === 'reveal-enter') ? 3 : 2);
+  protected viewportMultiplier = computed<number>(() => {
+      const enterExitViewport = (this.exit() === 'reveal-top-exit' && this.enter() === 'reveal-enter') ? 4 : (this.exit() === 'reveal-exit' || this.exit() === 'reveal-top-exit' || this.enter() === 'reveal-enter') ? 3 : 2;
+      const subtractedViewport = (this.isAnimated()) ? 0 : 1;
+
+      return enterExitViewport - subtractedViewport;
+    }
+  );
 
   backgroundSyle = computed(() => {
     console.log(this.backgroundImage());
@@ -49,26 +54,31 @@ export class GenericAnimatedSlide implements AfterViewInit {
     return `${this.viewportMultiplier() * 100}vh`;
   }
 
-  //Uncomment if z-index is needed for some browsers
-  // @HostBinding('style.--z-index')
-  // get zIndex() {
-  //   if (this.enter() !== 'reveal-enter-top' && this.enter() !== 'reveal-enter') {
-  //     return 'auto';
-  //   }
-  //   const previousSlide = this.element.nativeElement.previousElementSibling;
-  //   const previousIndex: string | number = window.getComputedStyle(previousSlide).zIndex;
-  //   const previousIndexNumeric: number = previousIndex === 'auto' ? 0 : parseInt(previousIndex);
-  //
-  //   if (this.enter() === 'reveal-enter') {
-  //     return previousIndexNumeric - 1;
-  //   }
-  //
-  //   if (this.enter() === 'reveal-enter-top') {
-  //     return previousIndexNumeric + 1;
-  //   }
-  //
-  //   return 0;
-  // }
+  @HostBinding('style.--text-top')
+  get getTextTop() {
+    const value = this.isAnimated() ? 100 : 0;
+    return `${value}%`;
+  }
+
+  @HostBinding('style.--z-index')
+  get zIndex() {
+    if (this.enter() !== 'reveal-enter-top' && this.enter() !== 'reveal-enter') {
+      return 'auto';
+    }
+    const previousSlide = this.element.nativeElement.previousElementSibling;
+    const previousIndex: string | number = window.getComputedStyle(previousSlide).zIndex;
+    const previousIndexNumeric: number = previousIndex === 'auto' ? 0 : parseInt(previousIndex);
+
+    if (this.enter() === 'reveal-enter') {
+      return previousIndexNumeric - 1;
+    }
+
+    if (this.enter() === 'reveal-enter-top') {
+      return previousIndexNumeric + 1;
+    }
+
+    return 0;
+  }
 
   @HostBinding('class.reveal-slide')
   get revealEnter() {
@@ -80,8 +90,19 @@ export class GenericAnimatedSlide implements AfterViewInit {
     return this.enter() === 'reveal-enter-top';
   }
 
+  @HostBinding('style.--margin-reveal')
+  get getMarginReveal() {
+    if (this.enter() === 'reveal-enter' && this.exit() === 'reveal-top-exit') {
+      return `-100vh`;
+    }
+
+    return null;
+  }
+
   @HostListener('window:scroll', [])
   animateTextOnScroll() {
+    console.log(this.text());
+    console.log(this.viewportMultiplier());
     const containerEl = this.slideRef.nativeElement.parentElement;
     const innerEl = this.slideRef.nativeElement;
     const textEl = this.textRef.nativeElement;
@@ -98,20 +119,25 @@ export class GenericAnimatedSlide implements AfterViewInit {
       const containerHeight = viewportHeight * this.viewportMultiplier()
       const totalPinDistance = containerHeight - viewportHeight;
 
-      let totalProgress = (scrollY - containerTop) / totalPinDistance;
-      totalProgress = Math.min(Math.max(totalProgress, 0), 1);
+      let minusviewport = (this.enter() === 'reveal-enter' && this.exit() === 'reveal-exit') ? viewportHeight : (this.enter() === 'reveal-enter' && this.exit() === 'reveal-top-exit')? viewportHeight : 0;
+      let totalProgress = (scrollY - containerTop - minusviewport) / totalPinDistance;
+      let progresstimes = (this.enter() === 'reveal-enter'  && this.exit() === 'reveal-top-exit'  && this.isAnimated()) ? 2 : 1;
+
+      totalProgress = Math.min(Math.max(totalProgress * progresstimes, 0), 1);
 
       let textProgress = Math.min(totalProgress * 2, 1);
 
       let unpinProgress = Math.min(Math.max((totalProgress - 0.5) * 2, 0), 1);
       const unpinOffset = -viewportHeight * unpinProgress;
 
-      animate(textEl, {
-        top: `${100 * (1 - textProgress)}%`,
-        opacity: textProgress,
-        ease: 'linear',
-        duration: 0.001
-      });
+      if (this.isAnimated()) {
+        animate(textEl, {
+          top: `${100 * (1 - textProgress)}%`,
+          opacity: textProgress,
+          ease: 'linear',
+          duration: 0.001
+        });
+      }
 
       if (this.exit() === 'reveal-exit') {
         animate(innerEl, {
@@ -131,12 +157,14 @@ export class GenericAnimatedSlide implements AfterViewInit {
 
       const progress = Math.min(Math.max(totalProgress * progresstimes, 0), 1);
 
-      animate(textEl, {
-        top: `${100 * (1 - progress)}%`,
-        opacity: progress,
-        ease: 'linear',
-        duration: 0.001
-      });
+      if (this.isAnimated()) {
+        animate(textEl, {
+          top: `${100 * (1 - progress)}%`,
+          opacity: progress,
+          ease: 'linear',
+          duration: 0.001
+        });
+      }
     } else {
 
       if (!this.isAnimated()) {
