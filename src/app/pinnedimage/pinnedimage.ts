@@ -66,7 +66,7 @@ export class Pinnedimage implements AfterViewInit {
         duration: 0.001
       });
 
-      console.log(unpinProgress);
+      // console.log(unpinProgress);
       // Apply unpin animation
       animate(innerEl, {
         // top: `${unpinOffset}px`, // Slides up from 0 to -100vh
@@ -98,7 +98,7 @@ export class Pinnedimage implements AfterViewInit {
         duration: 0.001
       });
 
-    } else if (this.animationStyle === 'reveal-exit') {
+    } else if (this.animationStyle === 'reveal-exit' || this.animationStyle == 'reveal-top-exit') {
       // --- Logic for the 'reveal-exit' slide (Container Height: 300vh)
 
       const containerHeight = viewportHeight * 3; // 300vh
@@ -128,16 +128,17 @@ export class Pinnedimage implements AfterViewInit {
         duration: 0.001
       });
 
-      console.log(unpinProgress);
-      // Apply unpin animation
-      animate(innerEl, {
-        // top: `${unpinOffset}px`, // Slides up from 0 to -100vh
-        top: `${unpinOffset}px`, // Slides up from 0 to -100vh
-        position: 'sticky',
-        ease: 'linear',
-        duration: 0.001
-      });
-
+      if (this.animationStyle === 'reveal-exit') {
+        // console.log(unpinProgress);
+        // Apply unpin animation
+        animate(innerEl, {
+          // top: `${unpinOffset}px`, // Slides up from 0 to -100vh
+          top: `${unpinOffset}px`, // Slides up from 0 to -100vh
+          position: 'sticky',
+          ease: 'linear',
+          duration: 0.001
+        });
+      }
     } else if (this.animationStyle === 'reveal-enter') {
       // --- Logic for the 'reveal-enter' slide (Container Height: 100vh)
 
