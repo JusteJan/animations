@@ -15,6 +15,7 @@ import {NgStyle} from '@angular/common';
 @Directive({})
 export class GenericAnimatedSlide implements AfterViewInit {
   isAnimated = input<boolean>(true);
+  animation = input<'text' | 'zoom'>('text');
   enter = input<null | 'reveal-enter' | 'reveal-enter-top'>(null);
   exit = input<null | 'reveal-exit' | 'reveal-top-exit'>(null);
   backgroundImage = input<string>();
@@ -44,6 +45,7 @@ export class GenericAnimatedSlide implements AfterViewInit {
   })
   @ViewChild('slideRef') slideRef!: ElementRef;
   @ViewChild('textRef') textRef!: ElementRef;
+  @ViewChild('contentRef') contentRef!: ElementRef;
 
   ngAfterViewInit() {
     this.animateTextOnScroll();
@@ -101,11 +103,10 @@ export class GenericAnimatedSlide implements AfterViewInit {
 
   @HostListener('window:scroll', [])
   animateTextOnScroll() {
-    console.log(this.text());
-    console.log(this.viewportMultiplier());
     const containerEl = this.slideRef.nativeElement.parentElement;
     const innerEl = this.slideRef.nativeElement;
     const textEl = this.textRef.nativeElement;
+    const contentRef = this.contentRef.nativeElement;
 
     const scrollY = window.scrollY;
     const rect = containerEl.getBoundingClientRect();
@@ -131,12 +132,28 @@ export class GenericAnimatedSlide implements AfterViewInit {
       const unpinOffset = -viewportHeight * unpinProgress;
 
       if (this.isAnimated()) {
-        animate(textEl, {
-          top: `${100 * (1 - textProgress)}%`,
-          opacity: textProgress,
-          ease: 'linear',
-          duration: 0.001
-        });
+        if (this.animation() === 'zoom') {
+          animate(contentRef, {
+            scale: 2 + (1 - 2) * textProgress,
+            opacity: textProgress,
+            ease: 'linear',
+            duration: 0.001
+          });
+
+          animate(textEl, {
+            top: 0,
+            opacity: textProgress,
+            ease: 'linear',
+            duration: 0.001
+          });
+        } else {
+          animate(textEl, {
+            top: `${100 * (1 - textProgress)}%`,
+            opacity: textProgress,
+            ease: 'linear',
+            duration: 0.001
+          });
+        }
       }
 
       if (this.exit() === 'reveal-exit') {
@@ -158,12 +175,27 @@ export class GenericAnimatedSlide implements AfterViewInit {
       const progress = Math.min(Math.max(totalProgress * progresstimes, 0), 1);
 
       if (this.isAnimated()) {
-        animate(textEl, {
-          top: `${100 * (1 - progress)}%`,
-          opacity: progress,
-          ease: 'linear',
-          duration: 0.001
-        });
+        if (this.animation() === 'zoom') {
+          animate(contentRef, {
+            scale: 2 + (1 - 2) * progress,
+            opacity: progress,
+            ease: 'linear',
+            duration: 0.001
+          });
+          animate(textEl, {
+            top: 0,
+            opacity: progress,
+            ease: 'linear',
+            duration: 0.001
+          });
+        } else {
+          animate(textEl, {
+            top: `${100 * (1 - progress)}%`,
+            opacity: progress,
+            ease: 'linear',
+            duration: 0.001
+          });
+        }
       }
     } else {
 
@@ -177,12 +209,31 @@ export class GenericAnimatedSlide implements AfterViewInit {
       let progress = (scrollY - containerTop) / totalPinDistance;
       progress = Math.min(Math.max(progress, 0), 1);
 
-      animate(textEl, {
-        top: `${100 * (1 - progress)}%`,
-        opacity: progress,
-        ease: 'linear',
-        duration: 0.001
-      });
+      if (this.animation() === 'text') {
+        animate(textEl, {
+          top: `${100 * (1 - progress)}%`,
+          opacity: progress,
+          ease: 'linear',
+          duration: 0.001
+        });
+      }
+
+      if (this.animation() === 'zoom') {
+        animate(contentRef, {
+          scale: 2 + (1 - 2) * progress,
+          opacity: progress,
+          ease: 'linear',
+          duration: 0.001
+        });
+
+        animate(textEl, {
+          top: 0,
+          opacity: progress,
+          ease: 'linear',
+          duration: 0.001
+        });
+      }
+
 
       // Ensure the inner slide sticks normally
       animate(innerEl, {

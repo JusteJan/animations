@@ -3,6 +3,13 @@
   height: var(--container-height, 200vh);
 }
 
+.slide-content {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
 :host(.reveal-slide) {
   z-index: var(--z-index, -1);
   position: relative;

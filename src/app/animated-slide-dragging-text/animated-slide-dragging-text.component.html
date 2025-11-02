@@ -1,9 +1,11 @@
 <div class="slide-container">
-  <div class="slide-inner" #slideRef [ngStyle]="backgroundSyle()">
-    <div class="text-container">
-      <div class="slide-text" #textRef>
-        <p>{{ text() }}</p>
+    <div class="slide-inner" #slideRef [ngStyle]="backgroundSyle()">
+      <div  class="slide-content" #contentRef>
+        <div class="text-container">
+          <div class="slide-text" #textRef>
+            <p>{{ text() }}</p>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
 </div>

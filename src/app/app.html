@@ -118,6 +118,94 @@
   [enter]="'reveal-enter-top'"
 ></app-animated-slide-dragging-text>
 
+<app-animated-slide-dragging-text
+  backgroundImage="images/tsuyoshi-kozu-BMk5PqDozE4-unsplash.jpg"
+  text="Animated slide with zoom out effect"
+  [animation]="'zoom'"
+></app-animated-slide-dragging-text>
+
+<app-animated-slide-pinned-image-dragging-text
+  background="#2c3e50"
+  text="This is an animated slide with pinned image and text sliding in, revealed from the bottom"
+  image="images/maksim-samuilionak-uymaeBza9KQ-unsplash.jpg"
+  [animation]="'zoom'"
+></app-animated-slide-pinned-image-dragging-text>
+
+<app-animated-slide-pinned-image-dragging-text
+  background="#2c3e50"
+  text="This is an animated slide with pinned image and text sliding in"
+  image="images/evgeni-tcherkasski-Ju7ZiCwu3DU-unsplash.jpg"
+  [exit]="'reveal-top-exit'"
+  [animation]="'zoom'"
+></app-animated-slide-pinned-image-dragging-text>
+
+
+<app-animated-slide-dragging-text
+  backgroundImage="images/eric-stoynov-Asi4unAq4us-unsplash.jpg"
+  text="This is an animated slide with text sliding in, revealed from the top"
+  [enter]="'reveal-enter-top'"
+  [exit]="'reveal-top-exit'"
+  [animation]="'zoom'"
+></app-animated-slide-dragging-text>
+
+<app-animated-slide-pinned-image-dragging-text
+  background="#2c3e50"
+  text="This is an animated slide with pinned image and text, revealed from the top"
+  [enter]="'reveal-enter-top'"
+  [exit]="'reveal-top-exit'"
+  [animation]="'zoom'"
+  image="images/deep-doshi-U_Pjpti-LzM-unsplash.jpg"
+></app-animated-slide-pinned-image-dragging-text>
+
+<app-animated-slide-dragging-text
+  backgroundImage="images/abdul-quadir-RHOA-WA3FtA-unsplash.jpg"
+  text="This is an animated slide with text sliding in, revealed from the top"
+  [enter]="'reveal-enter-top'"
+  [exit]="'reveal-exit'"
+  [animation]="'zoom'"
+></app-animated-slide-dragging-text>
+
+<!--The following four were the most problematic-->
+<!--These two are bugged if z-index is not calculated and if there is no isAnimated=false-->
+<app-animated-slide-pinned-image-dragging-text
+  background="#2c3e50"
+  text="This is an animated slide with pinned image and text sliding in, revealed from the bottom"
+  [enter]="'reveal-enter'"
+  [exit]="'reveal-exit'"
+  [animation]="'zoom'"
+  image="images/maksim-samuilionak-uymaeBza9KQ-unsplash.jpg"
+></app-animated-slide-pinned-image-dragging-text>
+
+<app-animated-slide-dragging-text
+  backgroundImage="images/tsuyoshi-kozu-BMk5PqDozE4-unsplash.jpg"
+  text="This is an animated slide with text sliding in, revealed from the bottom"
+  [enter]="'reveal-enter'"
+  [exit]="'reveal-top-exit'"
+  [animation]="'zoom'"
+></app-animated-slide-dragging-text>
+
+<app-animated-slide-dragging-text
+  backgroundImage="images/scott-lord-qV2xKnrSY6A-unsplash.jpg"
+  text="This is an animated slide with text sliding in, revealed from the top"
+  [enter]="'reveal-enter-top'"
+  [animation]="'zoom'"
+></app-animated-slide-dragging-text>
+
+<app-animated-slide-pinned-image-dragging-text
+  background="#2c3e50"
+  text="This is an animated slide with pinned image and text sliding in, revealed from the bottom"
+  [exit]="'reveal-exit'"
+  [isAnimated]="false"
+  image="images/maksim-samuilionak-uymaeBza9KQ-unsplash.jpg"
+></app-animated-slide-pinned-image-dragging-text>
+
+<app-animated-slide-dragging-text
+  backgroundImage="images/tsuyoshi-kozu-BMk5PqDozE4-unsplash.jpg"
+  text="This is an animated slide with text sliding in, revealed from the bottom"
+  [enter]="'reveal-enter'"
+  [animation]="'zoom'"
+></app-animated-slide-dragging-text>
+
 
 
 
