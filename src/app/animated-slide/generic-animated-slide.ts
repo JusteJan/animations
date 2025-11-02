@@ -15,7 +15,7 @@ import {NgStyle} from '@angular/common';
 @Directive({})
 export class GenericAnimatedSlide implements AfterViewInit {
   isAnimated = input<boolean>(true);
-  animation = input<'text' | 'zoom'>('text');
+  animation = input<'text' | 'zoom' | 'zoom-out'>('text');
   enter = input<null | 'reveal-enter' | 'reveal-enter-top'>(null);
   exit = input<null | 'reveal-exit' | 'reveal-top-exit'>(null);
   backgroundImage = input<string>();
@@ -146,6 +146,20 @@ export class GenericAnimatedSlide implements AfterViewInit {
             ease: 'linear',
             duration: 0.001
           });
+        } else if(this.animation() === 'zoom-out') {
+            animate(contentRef, {
+              scale: textProgress,
+              opacity: textProgress,
+              ease: 'linear',
+              duration: 0.001
+            });
+
+            animate(textEl, {
+              top: 0,
+              opacity: textProgress,
+              ease: 'linear',
+              duration: 0.001
+            });
         } else {
           animate(textEl, {
             top: `${100 * (1 - textProgress)}%`,
@@ -188,6 +202,20 @@ export class GenericAnimatedSlide implements AfterViewInit {
             ease: 'linear',
             duration: 0.001
           });
+        } else if (this.animation() === 'zoom-out') {
+          animate(contentRef, {
+            scale: progress,
+            opacity: progress,
+            ease: 'linear',
+            duration: 0.001
+          });
+
+          animate(textEl, {
+            top: 0,
+            opacity: progress,
+            ease: 'linear',
+            duration: 0.001
+          });
         } else {
           animate(textEl, {
             top: `${100 * (1 - progress)}%`,
@@ -221,6 +249,22 @@ export class GenericAnimatedSlide implements AfterViewInit {
       if (this.animation() === 'zoom') {
         animate(contentRef, {
           scale: 2 + (1 - 2) * progress,
+          opacity: progress,
+          ease: 'linear',
+          duration: 0.001
+        });
+
+        animate(textEl, {
+          top: 0,
+          opacity: progress,
+          ease: 'linear',
+          duration: 0.001
+        });
+      }
+
+      if (this.animation() === 'zoom-out') {
+        animate(contentRef, {
+          scale: progress,
           opacity: progress,
           ease: 'linear',
           duration: 0.001
