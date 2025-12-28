@@ -1,0 +1,24 @@
+relative and normal zindex for slide over.
+slide under - almost works in stash.
+
+if reveal-enter-top - add class reveal enter top
+if reveal-exit-top or reveal-exit - must add additional vh.
+
+for pan and zoom
+add vh * steps
+and check how much scrolled. trigger each step animation and then text.
+
+reveal-enter-top - the slide will scroll over the previous one.
+reveal-exit-top - the next slide will scroll over this one.
+reveal-exit - the next slide will be revealed from underneath this one.
+reveal-enter - this slide will be revealed from underneath the previous one.
+
+TODO:
+Pans and zoom must implement their own animations.
+enter -> pan -> text -> pan -> text -> leave
+
+Enter must happen with minus offset like usual but only for the initial step.
+Then progress must be calculated for each of the steps, first pan/zoom, then text.
+Then, at the last step, we accordingly calculate for the exit.
+
+Perhaps we can avoid animating if progress is < 0 and > 1

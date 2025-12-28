@@ -1,0 +1,23 @@
+<!--<button (click)="toggleAutoplay()">-->
+<!--  {{ isAutoplaying ? 'Pause' : 'Play' }}-->
+<!--</button>-->
+
+<swiper-container
+  #swiper
+  [slidesPerView]="1"
+  [watchSlidesProgress]="true"
+  effect="fade"
+  [loop]="false"
+  [autoplay]="{ delay: 3000, stopOnLastSlide: false, disableOnInteraction: false, waitForTransition: false }"
+  init="false"
+  speed="0"
+>
+  @for(item of slides; track $index) {
+    <swiper-slide>
+      <div  class="slide" [ngClass]="'slide-' + $index">
+        {{ item }}
+
+      </div>
+    </swiper-slide>
+  }
+</swiper-container>

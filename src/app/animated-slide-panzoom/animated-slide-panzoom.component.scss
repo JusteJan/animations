@@ -1,0 +1,42 @@
+@use '../animated-slide/generic-animated-slide' as *;
+
+
+.slide-container {
+  position: relative;
+  height: var(--container-height, 200vh);
+}
+
+.slide-inner {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.slide-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform-origin: center center;
+}
+
+.slide-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.slide-text {
+  color: white;
+  font-size: 2rem;
+  text-align: center;
+  top: 100%;
+  position: absolute;
+}

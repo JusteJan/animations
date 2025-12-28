@@ -1,0 +1,13 @@
+<div class="slide-container">
+  <div class="slide-inner" #slideRef>
+    <img #bgRef [src]="backgroundImage()" class="slide-bg" />
+
+    <div class="slide-content" #contentRef>
+        @for (step of steps(); track $index) {
+          <div class="slide-text" #textRef>
+            <p>{{ step.text }}</p>
+          </div>
+        }
+    </div>
+  </div>
+</div>

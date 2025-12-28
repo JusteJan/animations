@@ -32,7 +32,6 @@ export class GenericAnimatedSlide implements AfterViewInit {
   );
 
   backgroundSyle = computed(() => {
-    console.log(this.backgroundImage());
     if (this.backgroundImage()) {
       return {'background-image': 'url(' + this.backgroundImage() + ')'};
     }
@@ -126,8 +125,10 @@ export class GenericAnimatedSlide implements AfterViewInit {
 
       totalProgress = Math.min(Math.max(totalProgress * progresstimes, 0), 1);
 
+      //the text must leave before exit occurs. Because of this an additional viewport height is always added to exiting slides and the text must leave at twice the rate.
       let textProgress = Math.min(totalProgress * 2, 1);
 
+      //unpin happens when the next slide is revealed underneath the current one. The text is already at the proper place.
       let unpinProgress = Math.min(Math.max((totalProgress - 0.5) * 2, 0), 1);
       const unpinOffset = -viewportHeight * unpinProgress;
 
