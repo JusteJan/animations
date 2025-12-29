@@ -46,6 +46,23 @@ export class GenericAnimatedSlide implements AfterViewInit {
   @ViewChild('textRef') textRef!: ElementRef;
   @ViewChild('contentRef') contentRef!: ElementRef;
 
+  private rafId: number | null = null;
+  private wasActive: boolean = false;
+
+  private current = {
+    textTop: 100,
+    textOpacity: 0,
+    contentScale: 1,
+    innerTop: 0
+  };
+
+  private target = {
+    textTop: 100,
+    textOpacity: 0,
+    contentScale: 1,
+    innerTop: 0
+  };
+
   ngAfterViewInit() {
     this.animateTextOnScroll();
   }
@@ -100,6 +117,62 @@ export class GenericAnimatedSlide implements AfterViewInit {
     return null;
   }
 
+  private startRaf() {
+    const viewportHeight = window.innerHeight;
+
+    if (this.rafId !== null) return;
+
+    const tick = () => {
+      const ease = 0.18;
+
+      this.current.textTop +=
+        (this.target.textTop - this.current.textTop) * ease;
+
+      this.current.textOpacity +=
+        (this.target.textOpacity - this.current.textOpacity) * ease;
+
+      this.current.contentScale +=
+        (this.target.contentScale - this.current.contentScale) * ease;
+
+      this.current.innerTop +=
+        (this.target.innerTop - this.current.innerTop);
+
+      this.current.textTop = Math.min(Math.max(this.current.textTop, 0), 100);
+      this.current.textOpacity = Math.min(Math.max(this.current.textOpacity, 0), 1);
+      this.current.contentScale = Math.min(Math.max(this.current.contentScale, 0.01), 4);
+
+      this.render();
+
+      if (
+        Math.abs(this.current.textTop - this.target.textTop) < 0.1 &&
+        Math.abs(this.current.contentScale - this.target.contentScale) < 0.001 &&
+        Math.abs(this.current.innerTop - this.target.innerTop) < 0.5
+      ) {
+        this.rafId = null;
+        return;
+      }
+
+      this.rafId = requestAnimationFrame(tick);
+    };
+
+    this.rafId = requestAnimationFrame(tick);
+  }
+
+  private render() {
+    const textEl = this.textRef.nativeElement;
+    const contentRef = this.contentRef.nativeElement;
+    const innerEl = this.slideRef.nativeElement;
+
+    textEl.style.top = `${this.current.textTop}%`;
+    textEl.style.opacity = `${this.current.textOpacity}`;
+
+    contentRef.style.transform =
+      `scale(${this.current.contentScale})`;
+
+    innerEl.style.top = `${this.current.innerTop}px`;
+    innerEl.style.position = 'sticky';
+  }
+
   @HostListener('window:scroll', [])
   animateTextOnScroll() {
     const containerEl = this.slideRef.nativeElement.parentElement;
@@ -114,6 +187,22 @@ export class GenericAnimatedSlide implements AfterViewInit {
   // Adding window.scrollY converts this to a distance from the document top.
     const containerTop = rect.top + window.scrollY;
     const viewportHeight = window.innerHeight;
+
+    const isActive =
+      scrollY >= containerTop &&
+      scrollY <= containerTop + viewportHeight * this.viewportMultiplier();
+
+    if (isActive && !this.wasActive) {
+      this.current = {
+        textTop: !this.isAnimated() ? 0 : this.animation() == 'text' ? 100 : 0,
+        textOpacity: this.isAnimated() ? 0 : 1,
+        contentScale: this.animation() == 'zoom-out' ? 0 : this.animation() == 'zoom' ? 2 : 1,
+        innerTop: 0
+      };
+      this.target = { ...this.current };
+    }
+
+    this.wasActive = isActive;
 
     if (this.exit() === 'reveal-exit' || this.exit() === 'reveal-top-exit') {
       const containerHeight = viewportHeight * this.viewportMultiplier()
@@ -134,50 +223,21 @@ export class GenericAnimatedSlide implements AfterViewInit {
 
       if (this.isAnimated()) {
         if (this.animation() === 'zoom') {
-          animate(contentRef, {
-            scale: 2 + (1 - 2) * textProgress,
-            opacity: textProgress,
-            ease: 'linear',
-            duration: 0.001
-          });
-
-          animate(textEl, {
-            top: 0,
-            opacity: textProgress,
-            ease: 'linear',
-            duration: 0.001
-          });
+          this.target.contentScale = Math.max(2 + (1 - 2) * textProgress, 0.01);
+          this.target.textOpacity = textProgress;
+          this.target.textTop = 0;
         } else if(this.animation() === 'zoom-out') {
-            animate(contentRef, {
-              scale: textProgress,
-              opacity: textProgress,
-              ease: 'linear',
-              duration: 0.001
-            });
-
-            animate(textEl, {
-              top: 0,
-              opacity: textProgress,
-              ease: 'linear',
-              duration: 0.001
-            });
+          this.target.contentScale = Math.max(textProgress, 0.01);
+          this.target.textOpacity = textProgress;
+          this.target.textTop = 0;
         } else {
-          animate(textEl, {
-            top: `${100 * (1 - textProgress)}%`,
-            opacity: textProgress,
-            ease: 'linear',
-            duration: 0.001
-          });
+          this.target.textOpacity = textProgress;
+          this.target.textTop = 100 * (1 - textProgress);
         }
       }
 
       if (this.exit() === 'reveal-exit') {
-        animate(innerEl, {
-          top: `${unpinOffset}px`,
-          position: 'sticky',
-          ease: 'linear',
-          duration: 0.001
-        });
+        this.target.innerTop = -viewportHeight * unpinProgress;
       }
     } else if (this.enter() === 'reveal-enter' || this.enter() === 'reveal-enter-top') {
       const containerHeight = viewportHeight * this.viewportMultiplier()
@@ -191,44 +251,23 @@ export class GenericAnimatedSlide implements AfterViewInit {
 
       if (this.isAnimated()) {
         if (this.animation() === 'zoom') {
-          animate(contentRef, {
-            scale: 2 + (1 - 2) * progress,
-            opacity: progress,
-            ease: 'linear',
-            duration: 0.001
-          });
-          animate(textEl, {
-            top: 0,
-            opacity: progress,
-            ease: 'linear',
-            duration: 0.001
-          });
+          this.target.contentScale = Math.max(2 + (1 - 2) * progress, 0.01);
+          this.target.textOpacity = progress;
+          this.target.textTop = 0;
         } else if (this.animation() === 'zoom-out') {
-          animate(contentRef, {
-            scale: progress,
-            opacity: progress,
-            ease: 'linear',
-            duration: 0.001
-          });
-
-          animate(textEl, {
-            top: 0,
-            opacity: progress,
-            ease: 'linear',
-            duration: 0.001
-          });
+          this.target.contentScale = Math.max(progress, 0.01);
+          this.target.textOpacity = progress;
+          this.target.textTop = 0;
         } else {
-          animate(textEl, {
-            top: `${100 * (1 - progress)}%`,
-            opacity: progress,
-            ease: 'linear',
-            duration: 0.001
-          });
+          this.target.textTop = 100 * (1 - progress);
+          this.target.contentScale = 1;
+          this.target.textOpacity = progress;
         }
       }
     } else {
 
       if (!this.isAnimated()) {
+        this.startRaf();
         return;
       }
 
@@ -239,54 +278,26 @@ export class GenericAnimatedSlide implements AfterViewInit {
       progress = Math.min(Math.max(progress, 0), 1);
 
       if (this.animation() === 'text') {
-        animate(textEl, {
-          top: `${100 * (1 - progress)}%`,
-          opacity: progress,
-          ease: 'linear',
-          duration: 0.001
-        });
+        this.target.textTop = 100 * (1 - progress);
+        this.target.contentScale = 1;
+        this.target.textOpacity = progress;
       }
 
       if (this.animation() === 'zoom') {
-        animate(contentRef, {
-          scale: 2 + (1 - 2) * progress,
-          opacity: progress,
-          ease: 'linear',
-          duration: 0.001
-        });
-
-        animate(textEl, {
-          top: 0,
-          opacity: progress,
-          ease: 'linear',
-          duration: 0.001
-        });
+        this.target.textTop = 0;
+        this.target.contentScale = Math.max(2 + (1 - 2) * progress, 0.01);
+        this.target.textOpacity = progress;
       }
 
       if (this.animation() === 'zoom-out') {
-        animate(contentRef, {
-          scale: progress,
-          opacity: progress,
-          ease: 'linear',
-          duration: 0.001
-        });
+        this.target.textTop = 0;
+        this.target.contentScale = progress;
+        this.target.textOpacity = progress;
 
-        animate(textEl, {
-          top: 0,
-          opacity: progress,
-          ease: 'linear',
-          duration: 0.001
-        });
       }
 
-
-      // Ensure the inner slide sticks normally
-      animate(innerEl, {
-        top: '0px',
-        position: 'sticky',
-        ease: 'linear',
-        duration: 0.001
-      });
     }
+
+    this.startRaf();
   }
 }
