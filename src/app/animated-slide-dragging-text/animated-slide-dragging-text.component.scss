@@ -1,5 +1,11 @@
 @use '../animated-slide/generic-animated-slide' as *;
 
+:host.is-active {
+  .slide-inner, .slide-text, .slide-content {
+    will-change: transform, opacity;
+  }
+}
+
 .text-container {
   display: flex;
   width: 100%;
@@ -9,20 +15,24 @@
 
 .slide-inner {
   position: sticky;
-  top: var(--inner-top, 0);
+  top:0;
   height: 100vh; // pinned height
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   overflow: hidden;
-  scale: var(--inner-scale, 1);
+  transform: translateY(var(--inner-y, 0)) var(--inner-scale, 1);
+  will-change: auto;
 
   .slide-text {
     position: absolute;
-    top: var(--text-top, 100%); // initially below viewport
+    top: 0; // initially below viewport
     width: 100%;
     text-align: center;
     color: white;
     font-size: 2rem;
+    transform: translateY(var(--text-y, 100vh));
+    opacity: var(--text-opacity, 0);
+    will-change: auto;
   }
 }

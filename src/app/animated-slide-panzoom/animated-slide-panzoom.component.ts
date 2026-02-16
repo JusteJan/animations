@@ -28,19 +28,25 @@ export class AnimatedSlidePanzoomComponent
   @ViewChildren('textRef') textRefs!: QueryList<ElementRef>;
 
   override viewportMultiplier = computed<number>(() => {
-      const enterExitViewport = (this.exit() === 'reveal-top-exit' && this.enter() == 'reveal-enter') ? 3 : (this.enter() === 'reveal-enter' || this.exit() === 'reveal-top-exit') ? 2 : 1;
-      const subtractedViewport = (this.isAnimated()) ? 0 : 1;
+// 1. Calculate how many viewports we need for the Pan/Zoom steps
+      const stepsBase = this.steps().length;
 
-      return enterExitViewport - subtractedViewport;
+      // 2. Add extra viewports for the transitions (Your original logic)
+      const transitionExtra = (this.exit() === 'reveal-top-exit' && this.enter() == 'reveal-enter') ? 3 : (this.enter() === 'reveal-enter' || this.exit() === 'reveal-top-exit') ? 2 : 1;
+
+      // 3. Subtract 1 if not animated (prevents dead scroll space)
+      const animatedAdjustment = this.isAnimated() ? 0 : 1;
+
+      // Total = Steps + Transition Buffers - Animation Adjustment
+      // Ensure we never go below 1
+      return Math.max(1, stepsBase + transitionExtra - animatedAdjustment);
     }
   );
 
 
   @HostBinding('style.--container-height')
   override get getContainerHeight() {
-    let multiplier = this.viewportMultiplier() + this.steps().length;
-
-    return `${(multiplier) * 100}vh`;
+    return `${this.viewportMultiplier() * 100}vh`;
   }
 
   @HostBinding('style.--margin-reveal')
@@ -54,7 +60,7 @@ export class AnimatedSlidePanzoomComponent
 
 
   private animateSteps(scrollY: number, containerTop: number, viewportHeight: number) {
-    if (!this.steps() || this.steps().length === 0) return;
+    if (!this.steps() || this.steps().length === 0) return 0;
 
     const stepHeight = viewportHeight; // 100vh per step
     const stepsCount = this.steps().length;
@@ -79,11 +85,16 @@ export class AnimatedSlidePanzoomComponent
 
     stepProgress = Math.min(Math.max(stepProgress, 0), 1);
 
-    const panProgress = Math.min(stepProgress * 2, 1);       // 0 → 1 (first half)
-    const textProgress = Math.max((stepProgress - 0.5) * 2, 0); // 0 → 1 (second half)
-
     const currentStep = this.steps()[safeStepIndex];
     const prevStep = this.steps()[safeStepIndex - 1] ?? currentStep;
+
+    const isStatic = currentStep.x === prevStep.x &&
+      currentStep.y === prevStep.y &&
+      currentStep.scale === prevStep.scale;
+
+    const panProgress = isStatic ? 1 : Math.min(stepProgress * 2, 1);       // 0 → 1 (first half)
+    const textProgress = isStatic ? stepProgress : Math.max((stepProgress - 0.5) * 2, 0); // 0 → 1 (second half)
+
 
 // interpolation from previous to current step for smooth transition
     const scale =
@@ -93,39 +104,33 @@ export class AnimatedSlidePanzoomComponent
     const y =
       prevStep.y + (currentStep.y - prevStep.y) * panProgress;
 
-    animate(this.bgRef.nativeElement, {
-      scale,
-      translateX: x,
-      translateY: y,
-      easing: 'linear',
-      duration: 0.001
-    });
+    const bg = this.bgRef.nativeElement;
+    bg.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
 
     this.textRefs.forEach((ref, i) => {
       const el = ref.nativeElement;
 
       if (i < safeStepIndex) {
-        // already passed step is fully above viewport
-        el.style.top = '-100%';
+        // Passed: Hidden above
+        el.style.transform = `translateY(-100vh)`;
         el.style.opacity = '0';
-        return;
-      }
-
-      if (i > safeStepIndex) {
-        // not yet active is below viewport
-        el.style.top = '100%';
+      } else if (i > safeStepIndex) {
+        // Future: Hidden below
+        el.style.transform = `translateY(100vh)`;
         el.style.opacity = '0';
-        return;
+      } else {
+        // Current: Moves from 100vh -> 0vh -> -100vh
+        // Range is 200vh total travel distance
+        const textY = 100 - (textProgress * 200);
+
+        // Fade in until 50% scroll, then fade out
+        const opacity = textProgress < 0.5
+          ? textProgress * 2
+          : 2 - (textProgress * 2);
+
+        el.style.transform = `translateY(${textY}vh)`;
+        el.style.opacity = `${opacity}`;
       }
-
-      const y = 100 - textProgress * 100;
-
-      animate(el, {
-        top: `${y}%`,
-        opacity: 1,
-        easing: 'linear',
-        duration: 0.001
-      });
     });
 
     return safeStepIndex;
@@ -133,10 +138,8 @@ export class AnimatedSlidePanzoomComponent
 
   override animateTextOnScroll() {
     const containerEl = this.slideRef.nativeElement.parentElement;
-
     const scrollY = window.scrollY;
     const rect = containerEl.getBoundingClientRect();
-
     const containerTop = rect.top + window.scrollY;
     const viewportHeight = window.innerHeight;
     const stepIndex = this.animateSteps(scrollY, containerTop, viewportHeight) ?? 0;

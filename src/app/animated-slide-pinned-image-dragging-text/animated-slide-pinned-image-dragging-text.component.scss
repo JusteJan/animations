@@ -1,5 +1,11 @@
 @use '../animated-slide/generic-animated-slide' as *;
 
+:host.is-active {
+  .slide-inner, .slide-text, .slide-content {
+    will-change: transform, opacity;
+  }
+}
+
 .text-container {
   display: flex;
   width: 50%;
@@ -17,13 +23,16 @@
   overflow: hidden;
   display: flex;
   scale: var(--inner-scale, 1);
+  will-change: auto;
 
   .slide-text {
     position: absolute;
-    top: var(--text-top, 100%); // initially below viewport
+    top: 0; // initially below viewport
+    transform: translateY(var(--text-y, 100vh));
     text-align: center;
     color: white;
     font-size: 2rem;
+    will-change: auto;
   }
 
   .image {

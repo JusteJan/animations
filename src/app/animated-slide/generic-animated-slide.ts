@@ -7,13 +7,14 @@ import {
   AfterViewInit,
   input,
   signal,
-  OnInit, computed, HostBinding, Directive, inject
+  OnInit, computed, HostBinding, Directive, inject, NgZone, effect
 } from '@angular/core';
 import {animate} from 'animejs';
 import {NgStyle} from '@angular/common';
 
 @Directive({})
-export class GenericAnimatedSlide implements AfterViewInit {
+export class GenericAnimatedSlide implements AfterViewInit, OnInit {
+  private ngZone = inject(NgZone)
   isAnimated = input<boolean>(true);
   animation = input<'text' | 'zoom' | 'zoom-out'>('text');
   enter = input<null | 'reveal-enter' | 'reveal-enter-top'>(null);
@@ -22,54 +23,24 @@ export class GenericAnimatedSlide implements AfterViewInit {
   background = input<string>();
   text = input.required<string>();
   zindex = input<number | null>(null);
+  absoluteContainerTop: number = 0;
   element = inject(ElementRef);
   protected viewportMultiplier = computed<number>(() => {
-      const enterExitViewport = (this.exit() === 'reveal-top-exit' && this.enter() === 'reveal-enter') ? 4 : (this.exit() === 'reveal-exit' || this.exit() === 'reveal-top-exit' || this.enter() === 'reveal-enter') ? 3 : 2;
-      const subtractedViewport = (this.isAnimated()) ? 0 : 1;
+    const enterExitViewport = (this.exit() === 'reveal-top-exit' && this.enter() === 'reveal-enter') ? 4 : (this.exit() === 'reveal-exit' || this.exit() === 'reveal-top-exit' || this.enter() === 'reveal-enter') ? 3 : 2;
+    const subtractedViewport = (this.isAnimated()) ? 0 : 1;
 
-      return enterExitViewport - subtractedViewport;
-    }
-  );
+    return(enterExitViewport - subtractedViewport);
+  });
+  @HostBinding('style.--z-index') zIndex: string | number = '1';
+  @HostBinding('class.is-active') isActiveSlide = false;
 
-  backgroundSyle = computed(() => {
-    if (this.backgroundImage()) {
-      return {'background-image': 'url(' + this.backgroundImage() + ')'};
-    }
-
-    if (this.background()) {
-      return {'backgroundColor': `${this.background()}`};
-    }
-
-    return {};
-  })
-  @ViewChild('slideRef') slideRef!: ElementRef;
-  @ViewChild('textRef') textRef!: ElementRef;
-  @ViewChild('contentRef') contentRef!: ElementRef;
-
-  private rafId: number | null = null;
-  private wasActive: boolean = false;
-
-  private current = {
-    textTop: 100,
-    textOpacity: 0,
-    contentScale: 1,
-    innerTop: 0
-  };
-
-  private target = {
-    textTop: 100,
-    textOpacity: 0,
-    contentScale: 1,
-    innerTop: 0
-  };
-
-  ngAfterViewInit() {
-    this.animateTextOnScroll();
+  ngOnInit() {
+    this.zIndex = this.calculatezIndex();
   }
 
   @HostBinding('style.--container-height')
   get getContainerHeight() {
-    return `${this.viewportMultiplier() * 100}vh`;
+    return `${this.viewportMultiplier() * 100}vh`
   }
 
   @HostBinding('style.--text-top')
@@ -78,8 +49,8 @@ export class GenericAnimatedSlide implements AfterViewInit {
     return `${value}%`;
   }
 
-  @HostBinding('style.--z-index')
-  get zIndex() {
+
+  private calculatezIndex() {
     if (this.enter() !== 'reveal-enter-top' && this.enter() !== 'reveal-enter') {
       return 'auto';
     }
@@ -116,6 +87,68 @@ export class GenericAnimatedSlide implements AfterViewInit {
 
     return null;
   }
+
+  backgroundSyle = computed(() => {
+    if (this.backgroundImage()) {
+      return {'background-image': 'url(' + this.backgroundImage() + ')'};
+    }
+
+    if (this.background()) {
+      return {'backgroundColor': `${this.background()}`};
+    }
+
+    return {};
+  })
+  @ViewChild('slideRef') slideRef!: ElementRef;
+  @ViewChild('textRef') textRef!: ElementRef;
+  @ViewChild('contentRef') contentRef!: ElementRef;
+
+  private rafId: number | null = null;
+  private wasActive: boolean = false;
+
+  private current = {
+    textTop: 100,
+    textOpacity: 0,
+    contentScale: 1,
+    innerTop: 0
+  };
+
+  private target = {
+    textTop: 100,
+    textOpacity: 0,
+    contentScale: 1,
+    innerTop: 0
+  };
+
+  ngAfterViewInit() {
+    this.calculateDimensions();
+    this.ngZone.runOutsideAngular(() => {
+      let scheduledAnimationFrame = false;
+
+      window.addEventListener('scroll', () => {
+        if (scheduledAnimationFrame) return;
+
+        scheduledAnimationFrame = true;
+        requestAnimationFrame(() => {
+          this.animateTextOnScroll();
+          scheduledAnimationFrame = false;
+        });
+      }, { passive: true });
+    })
+    window.addEventListener('resize', () => this.calculateDimensions());
+
+  }
+
+
+private calculateDimensions() {
+  const containerEl = this.slideRef.nativeElement.parentElement;
+  if (!containerEl) return;
+
+  const rect = containerEl.getBoundingClientRect();
+  this.absoluteContainerTop = rect.top + window.scrollY;
+
+  this.animateTextOnScroll();
+}
 
   private startRaf() {
     const viewportHeight = window.innerHeight;
@@ -163,34 +196,27 @@ export class GenericAnimatedSlide implements AfterViewInit {
     const contentRef = this.contentRef.nativeElement;
     const innerEl = this.slideRef.nativeElement;
 
-    textEl.style.top = `${this.current.textTop}%`;
+    textEl.style.transform = `translate3d(0, ${this.current.textTop}vh, 0)`;
     textEl.style.opacity = `${this.current.textOpacity}`;
 
     contentRef.style.transform =
       `scale(${this.current.contentScale})`;
 
-    innerEl.style.top = `${this.current.innerTop}px`;
-    innerEl.style.position = 'sticky';
+    innerEl.style.transform = `translate3d(0, ${this.current.innerTop}px, 0)`;
   }
 
-  @HostListener('window:scroll', [])
   animateTextOnScroll() {
-    const containerEl = this.slideRef.nativeElement.parentElement;
-    const innerEl = this.slideRef.nativeElement;
-    const textEl = this.textRef.nativeElement;
-    const contentRef = this.contentRef.nativeElement;
-
-    const scrollY = window.scrollY;
-    const rect = containerEl.getBoundingClientRect();
-
-  // rect.top is the distance from the viewport top to the element. 0 means the element's top aligns with the top of the viewport - 'the screen'
-  // Adding window.scrollY converts this to a distance from the document top.
-    const containerTop = rect.top + window.scrollY;
+    const scroll = window.scrollY;
+    const containerTop =this.absoluteContainerTop;
     const viewportHeight = window.innerHeight;
 
     const isActive =
-      scrollY >= containerTop &&
-      scrollY <= containerTop + viewportHeight * this.viewportMultiplier();
+      scroll >= containerTop &&
+      scroll <= containerTop + viewportHeight * this.viewportMultiplier();
+
+    if (this.isActiveSlide !== isActive) {
+      this.isActiveSlide = isActive;
+    }
 
     if (isActive && !this.wasActive) {
       this.current = {
@@ -209,7 +235,7 @@ export class GenericAnimatedSlide implements AfterViewInit {
       const totalPinDistance = containerHeight - viewportHeight;
 
       let minusviewport = (this.enter() === 'reveal-enter' && this.exit() === 'reveal-exit') ? viewportHeight : (this.enter() === 'reveal-enter' && this.exit() === 'reveal-top-exit')? viewportHeight : 0;
-      let totalProgress = (scrollY - containerTop - minusviewport) / totalPinDistance;
+      let totalProgress = (scroll - containerTop - minusviewport) / totalPinDistance;
       let progresstimes = (this.enter() === 'reveal-enter'  && this.exit() === 'reveal-top-exit'  && this.isAnimated()) ? 2 : 1;
 
       totalProgress = Math.min(Math.max(totalProgress * progresstimes, 0), 1);
@@ -244,7 +270,7 @@ export class GenericAnimatedSlide implements AfterViewInit {
       const totalPinDistance = containerHeight - viewportHeight; // 200vh
 
       let minusviewport = this.enter() === 'reveal-enter' ? viewportHeight : 0;
-      let totalProgress = (scrollY - containerTop - minusviewport) / totalPinDistance;
+      let totalProgress = (scroll - containerTop - minusviewport) / totalPinDistance;
       let progresstimes = this.enter() === 'reveal-enter' ? 2 : 1;
 
       const progress = Math.min(Math.max(totalProgress * progresstimes, 0), 1);
@@ -267,6 +293,9 @@ export class GenericAnimatedSlide implements AfterViewInit {
     } else {
 
       if (!this.isAnimated()) {
+        this.target.textTop = 0;
+        this.target.textOpacity = 1;
+        this.target.contentScale = 1;
         this.startRaf();
         return;
       }
@@ -274,7 +303,7 @@ export class GenericAnimatedSlide implements AfterViewInit {
       const containerHeight = viewportHeight * this.viewportMultiplier();
       const totalPinDistance = containerHeight - viewportHeight; // 100vh
 
-      let progress = (scrollY - containerTop) / totalPinDistance;
+      let progress = (scroll - containerTop) / totalPinDistance;
       progress = Math.min(Math.max(progress, 0), 1);
 
       if (this.animation() === 'text') {
@@ -298,6 +327,8 @@ export class GenericAnimatedSlide implements AfterViewInit {
 
     }
 
-    this.startRaf();
+    if (this.rafId === null) {
+      this.startRaf();
+    }
   }
 }
