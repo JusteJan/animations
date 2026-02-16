@@ -1,13 +1,9 @@
 import {
-  Component,
   ElementRef,
-  Input,
-  HostListener,
   ViewChild,
   AfterViewInit,
   input,
-  signal,
-  OnInit, computed, HostBinding, Directive, inject, NgZone, effect
+  OnInit, computed, HostBinding, Directive, inject, NgZone
 } from '@angular/core';
 
 @Directive({})
@@ -20,7 +16,6 @@ export class GenericAnimatedSlide implements AfterViewInit, OnInit {
   backgroundImage = input<string>();
   background = input<string>();
   text = input.required<string>();
-  zindex = input<number | null>(null);
   absoluteContainerTop: number = 0;
   element = inject(ElementRef);
   protected viewportMultiplier = computed<number>(() => {
@@ -29,7 +24,6 @@ export class GenericAnimatedSlide implements AfterViewInit, OnInit {
 
     return(enterExitViewport - subtractedViewport);
   });
-   zIndex: string | number = '1';
   @HostBinding('class.is-active') isActiveSlide = false;
 
   ngOnInit() {
@@ -152,7 +146,6 @@ private calculateDimensions() {
 
       this.render();
 
-      // PERFORMANCE OPTIMIZATION: Stop RAF if we are at the target (essential for the 'hold' phase)
       if (
         Math.abs(this.current.textTop - this.target.textTop) < 0.05 &&
         Math.abs(this.current.contentScale - this.target.contentScale) < 0.001 &&
@@ -186,7 +179,7 @@ private calculateDimensions() {
     const scroll = window.scrollY;
     const containerTop =this.absoluteContainerTop;
     const viewportHeight = window.innerHeight;
-    const snap = 0.8;
+    const snap = 0.5;
 
     const isActive =
       scroll >= containerTop &&
@@ -218,11 +211,9 @@ private calculateDimensions() {
 
       totalProgress = Math.min(Math.max(totalProgress * progresstimes, 0), 1);
 
-      //the text must leave before exit occurs. Because of this an additional viewport height is always added to exiting slides and the text must leave at twice the rate.
       let textProgress = Math.min(totalProgress * 2, 1);
-      let animProgress = Math.min(textProgress / snap, 1);      //unpin happens when the next slide is revealed underneath the current one. The text is already at the proper place.
+      let animProgress = Math.min(textProgress / snap, 1);
       let unpinProgress = Math.min(Math.max((totalProgress - 0.5) * 2, 0), 1);
-      const unpinOffset = -viewportHeight * unpinProgress;
 
       if (this.isAnimated()) {
         this.applyAnimationTargets(animProgress);
@@ -263,24 +254,7 @@ private calculateDimensions() {
 
       const animProgress = Math.min(progress / snap, 1);
 
-      if (this.animation() === 'text') {
-        this.target.textTop = 100 * (1 - animProgress);
-        this.target.contentScale = 1;
-        this.target.textOpacity = animProgress;
-      }
-
-      if (this.animation() === 'zoom') {
-        this.target.textTop = 0;
-        this.target.contentScale = Math.max(2 + (1 - 2) * animProgress, 0.01);
-        this.target.textOpacity = animProgress;
-      }
-
-      if (this.animation() === 'zoom-out') {
-        this.target.textTop = 0;
-        this.target.contentScale = animProgress;
-        this.target.textOpacity = animProgress;
-
-      }
+      this.applyAnimationTargets(animProgress);
 
     }
 
