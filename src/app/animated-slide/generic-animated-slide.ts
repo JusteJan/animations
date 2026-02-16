@@ -9,8 +9,6 @@ import {
   signal,
   OnInit, computed, HostBinding, Directive, inject, NgZone, effect
 } from '@angular/core';
-import {animate} from 'animejs';
-import {NgStyle} from '@angular/common';
 
 @Directive({})
 export class GenericAnimatedSlide implements AfterViewInit, OnInit {
@@ -31,11 +29,10 @@ export class GenericAnimatedSlide implements AfterViewInit, OnInit {
 
     return(enterExitViewport - subtractedViewport);
   });
-  @HostBinding('style.--z-index') zIndex: string | number = '1';
+   zIndex: string | number = '1';
   @HostBinding('class.is-active') isActiveSlide = false;
 
   ngOnInit() {
-    this.zIndex = this.calculatezIndex();
   }
 
   @HostBinding('style.--container-height')
@@ -49,8 +46,8 @@ export class GenericAnimatedSlide implements AfterViewInit, OnInit {
     return `${value}%`;
   }
 
-
-  private calculatezIndex() {
+  @HostBinding('style.--z-index')
+  get calculatezIndex() {
     if (this.enter() !== 'reveal-enter-top' && this.enter() !== 'reveal-enter') {
       return 'auto';
     }
@@ -123,22 +120,14 @@ export class GenericAnimatedSlide implements AfterViewInit, OnInit {
   ngAfterViewInit() {
     this.calculateDimensions();
     this.ngZone.runOutsideAngular(() => {
-      let scheduledAnimationFrame = false;
 
       window.addEventListener('scroll', () => {
-        if (scheduledAnimationFrame) return;
-
-        scheduledAnimationFrame = true;
-        requestAnimationFrame(() => {
           this.animateTextOnScroll();
-          scheduledAnimationFrame = false;
-        });
       }, { passive: true });
     })
     window.addEventListener('resize', () => this.calculateDimensions());
 
   }
-
 
 private calculateDimensions() {
   const containerEl = this.slideRef.nativeElement.parentElement;
@@ -151,33 +140,21 @@ private calculateDimensions() {
 }
 
   private startRaf() {
-    const viewportHeight = window.innerHeight;
-
     if (this.rafId !== null) return;
 
     const tick = () => {
-      const ease = 0.18;
+      const ease = 0.08;
 
-      this.current.textTop +=
-        (this.target.textTop - this.current.textTop) * ease;
-
-      this.current.textOpacity +=
-        (this.target.textOpacity - this.current.textOpacity) * ease;
-
-      this.current.contentScale +=
-        (this.target.contentScale - this.current.contentScale) * ease;
-
-      this.current.innerTop +=
-        (this.target.innerTop - this.current.innerTop);
-
-      this.current.textTop = Math.min(Math.max(this.current.textTop, 0), 100);
-      this.current.textOpacity = Math.min(Math.max(this.current.textOpacity, 0), 1);
-      this.current.contentScale = Math.min(Math.max(this.current.contentScale, 0.01), 4);
+      this.current.textTop += (this.target.textTop - this.current.textTop) * ease;
+      this.current.textOpacity += (this.target.textOpacity - this.current.textOpacity) * ease;
+      this.current.contentScale += (this.target.contentScale - this.current.contentScale) * ease;
+      this.current.innerTop += (this.target.innerTop - this.current.innerTop);
 
       this.render();
 
+      // PERFORMANCE OPTIMIZATION: Stop RAF if we are at the target (essential for the 'hold' phase)
       if (
-        Math.abs(this.current.textTop - this.target.textTop) < 0.1 &&
+        Math.abs(this.current.textTop - this.target.textTop) < 0.05 &&
         Math.abs(this.current.contentScale - this.target.contentScale) < 0.001 &&
         Math.abs(this.current.innerTop - this.target.innerTop) < 0.5
       ) {
@@ -209,6 +186,7 @@ private calculateDimensions() {
     const scroll = window.scrollY;
     const containerTop =this.absoluteContainerTop;
     const viewportHeight = window.innerHeight;
+    const snap = 0.8;
 
     const isActive =
       scroll >= containerTop &&
@@ -242,24 +220,12 @@ private calculateDimensions() {
 
       //the text must leave before exit occurs. Because of this an additional viewport height is always added to exiting slides and the text must leave at twice the rate.
       let textProgress = Math.min(totalProgress * 2, 1);
-
-      //unpin happens when the next slide is revealed underneath the current one. The text is already at the proper place.
+      let animProgress = Math.min(textProgress / snap, 1);      //unpin happens when the next slide is revealed underneath the current one. The text is already at the proper place.
       let unpinProgress = Math.min(Math.max((totalProgress - 0.5) * 2, 0), 1);
       const unpinOffset = -viewportHeight * unpinProgress;
 
       if (this.isAnimated()) {
-        if (this.animation() === 'zoom') {
-          this.target.contentScale = Math.max(2 + (1 - 2) * textProgress, 0.01);
-          this.target.textOpacity = textProgress;
-          this.target.textTop = 0;
-        } else if(this.animation() === 'zoom-out') {
-          this.target.contentScale = Math.max(textProgress, 0.01);
-          this.target.textOpacity = textProgress;
-          this.target.textTop = 0;
-        } else {
-          this.target.textOpacity = textProgress;
-          this.target.textTop = 100 * (1 - textProgress);
-        }
+        this.applyAnimationTargets(animProgress);
       }
 
       if (this.exit() === 'reveal-exit') {
@@ -274,21 +240,10 @@ private calculateDimensions() {
       let progresstimes = this.enter() === 'reveal-enter' ? 2 : 1;
 
       const progress = Math.min(Math.max(totalProgress * progresstimes, 0), 1);
+      let animProgress = Math.min(progress/snap, 1);
 
       if (this.isAnimated()) {
-        if (this.animation() === 'zoom') {
-          this.target.contentScale = Math.max(2 + (1 - 2) * progress, 0.01);
-          this.target.textOpacity = progress;
-          this.target.textTop = 0;
-        } else if (this.animation() === 'zoom-out') {
-          this.target.contentScale = Math.max(progress, 0.01);
-          this.target.textOpacity = progress;
-          this.target.textTop = 0;
-        } else {
-          this.target.textTop = 100 * (1 - progress);
-          this.target.contentScale = 1;
-          this.target.textOpacity = progress;
-        }
+        this.applyAnimationTargets(animProgress);
       }
     } else {
 
@@ -306,22 +261,24 @@ private calculateDimensions() {
       let progress = (scroll - containerTop) / totalPinDistance;
       progress = Math.min(Math.max(progress, 0), 1);
 
+      const animProgress = Math.min(progress / snap, 1);
+
       if (this.animation() === 'text') {
-        this.target.textTop = 100 * (1 - progress);
+        this.target.textTop = 100 * (1 - animProgress);
         this.target.contentScale = 1;
-        this.target.textOpacity = progress;
+        this.target.textOpacity = animProgress;
       }
 
       if (this.animation() === 'zoom') {
         this.target.textTop = 0;
-        this.target.contentScale = Math.max(2 + (1 - 2) * progress, 0.01);
-        this.target.textOpacity = progress;
+        this.target.contentScale = Math.max(2 + (1 - 2) * animProgress, 0.01);
+        this.target.textOpacity = animProgress;
       }
 
       if (this.animation() === 'zoom-out') {
         this.target.textTop = 0;
-        this.target.contentScale = progress;
-        this.target.textOpacity = progress;
+        this.target.contentScale = animProgress;
+        this.target.textOpacity = animProgress;
 
       }
 
@@ -329,6 +286,22 @@ private calculateDimensions() {
 
     if (this.rafId === null) {
       this.startRaf();
+    }
+  }
+
+  private applyAnimationTargets(progress: number) {
+    if (this.animation() === 'zoom') {
+      this.target.contentScale = Math.max(2 + (1 - 2) * progress, 0.01);
+      this.target.textOpacity = progress;
+      this.target.textTop = 0;
+    } else if (this.animation() === 'zoom-out') {
+      this.target.contentScale = Math.max(progress, 0.01);
+      this.target.textOpacity = progress;
+      this.target.textTop = 0;
+    } else {
+      this.target.textTop = 100 * (1 - progress);
+      this.target.contentScale = 1;
+      this.target.textOpacity = progress;
     }
   }
 }
