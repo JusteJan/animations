@@ -16,12 +16,11 @@
   width: 100%;
   height: 100vh;
   overflow: hidden;
-  transform: translateY(var(--inner-y, 0));
+  transform: translateY(0);
   will-change: transform;
 }
 
 .slide-text {
-  /* Match your existing typography */
   position: absolute;
   width: 100%;
   text-align: center;

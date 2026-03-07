@@ -16,23 +16,23 @@
 .slide-inner {
   position: sticky;
   top:0;
-  height: 100vh; // pinned height
+  height: 100vh;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   overflow: hidden;
-  transform: translateY(var(--inner-y, 0)) var(--inner-scale, 1);
+  transform: translateY(0) scale(1);
   will-change: auto;
 
   .slide-text {
     position: absolute;
-    top: 0; // initially below viewport
+    top: 0;
     width: 100%;
     text-align: center;
     color: white;
     font-size: 2rem;
-    transform: translateY(var(--text-y, 100vh));
-    opacity: var(--text-opacity, 0);
+    transform: translateY(100vh);
+    opacity: 0;
     will-change: auto;
   }
 }
