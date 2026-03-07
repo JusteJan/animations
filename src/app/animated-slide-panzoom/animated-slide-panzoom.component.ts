@@ -17,7 +17,7 @@ export class AnimatedSlidePanzoomComponent
   extends GenericAnimatedSlide
   implements AfterViewInit {
 
-  steps = input<{ scale: number; x: number; y: number; text: string }[]>([{x: 0, y: 0, scale: 1, text: "First"}, {x: 50, y: 50, scale: 5, text: "Second"}, {x: 50, y: 50, scale: 5, text: "Third"}, {x: 10, y: 10, scale: 1.5, text: "Fourth"}, {x: 90, y: 90, scale: 10, text: "Fifth"}]);
+  steps = input<{ scale: number; x: number; y: number; text: string }[]>([{x: 0, y: 0, scale: 1, text: "First"}, {x: 50, y: 50, scale: 5, text: "Second"}, {x: 50, y: 50, scale: 5, text: "Third"}, {x: 10, y: 10, scale: 1.5, text: "Fourth"}, {x: 1900, y: 500, scale: 10, text: "Fifth"}, {x: 50, y: 20, scale: 10, text: "Sixth"}]);
   @ViewChild('bgRef') bgRef!: ElementRef<HTMLImageElement>;
   @ViewChildren('textRef') textRefs!: QueryList<ElementRef>;
 
