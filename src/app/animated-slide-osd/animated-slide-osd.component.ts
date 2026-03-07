@@ -72,7 +72,10 @@ export class AnimatedSlideIiifComponent extends GenericAnimatedSlide implements 
         gestureSettingsMouse: { clickToZoom: false, dragToPan: false, scrollToZoom: false },
         gestureSettingsTouch: { clickToZoom: false, dragToPan: false, scrollToZoom: false },
         alwaysBlend: true,
-        animationTime: 0.5
+        animationTime: 0.5,
+        minZoomImageRatio: 1,
+        visibilityRatio: 1,
+        constrainDuringPan: true
       });
     }, 100)
 
