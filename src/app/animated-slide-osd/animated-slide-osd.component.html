@@ -1,0 +1,14 @@
+<div class="slide-container">
+  <div class="slide-inner" #slideRef>
+
+    <div #osdContainer class="slide-bg"></div>
+
+    <div class="slide-content">
+      @for (step of steps(); track $index) {
+        <div class="slide-text" #textRef>
+          <p>{{ step.text }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>

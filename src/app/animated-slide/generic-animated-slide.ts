@@ -34,12 +34,6 @@ export class GenericAnimatedSlide implements AfterViewInit, OnInit {
     return `${this.viewportMultiplier() * 100}vh`
   }
 
-  @HostBinding('style.--text-top')
-  get getTextTop() {
-    const value = this.isAnimated() ? 100 : 0;
-    return `${value}%`;
-  }
-
   @HostBinding('style.--z-index')
   get calculatezIndex() {
     if (this.enter() !== 'reveal-enter-top' && this.enter() !== 'reveal-enter') {
@@ -98,17 +92,17 @@ export class GenericAnimatedSlide implements AfterViewInit, OnInit {
   private wasActive: boolean = false;
 
   private current = {
-    textTop: 100,
+    textTranslate: 100,
     textOpacity: 0,
     contentScale: 1,
-    innerTop: 0
+    innerTranslate: 0
   };
 
   private target = {
-    textTop: 100,
+    textTranslate: 100,
     textOpacity: 0,
     contentScale: 1,
-    innerTop: 0
+    innerTranslate: 0
   };
 
   ngAfterViewInit() {
@@ -137,19 +131,19 @@ private calculateDimensions() {
     if (this.rafId !== null) return;
 
     const tick = () => {
-      const ease = 0.08;
+      const ease = 0.8;
 
-      this.current.textTop += (this.target.textTop - this.current.textTop) * ease;
+      this.current.textTranslate += (this.target.textTranslate - this.current.textTranslate) * ease;
       this.current.textOpacity += (this.target.textOpacity - this.current.textOpacity) * ease;
       this.current.contentScale += (this.target.contentScale - this.current.contentScale) * ease;
-      this.current.innerTop += (this.target.innerTop - this.current.innerTop);
+      this.current.innerTranslate += (this.target.innerTranslate - this.current.innerTranslate);
 
       this.render();
 
       if (
-        Math.abs(this.current.textTop - this.target.textTop) < 0.05 &&
+        Math.abs(this.current.textTranslate - this.target.textTranslate) < 0.05 &&
         Math.abs(this.current.contentScale - this.target.contentScale) < 0.001 &&
-        Math.abs(this.current.innerTop - this.target.innerTop) < 0.5
+        Math.abs(this.current.innerTranslate - this.target.innerTranslate) < 0.5
       ) {
         this.rafId = null;
         return;
@@ -166,20 +160,20 @@ private calculateDimensions() {
     const contentRef = this.contentRef.nativeElement;
     const innerEl = this.slideRef.nativeElement;
 
-    textEl.style.transform = `translate3d(0, ${this.current.textTop}vh, 0)`;
+    textEl.style.transform = `translate3d(0, ${this.current.textTranslate}vh, 0)`;
     textEl.style.opacity = `${this.current.textOpacity}`;
 
     contentRef.style.transform =
       `scale(${this.current.contentScale})`;
 
-    innerEl.style.transform = `translate3d(0, ${this.current.innerTop}px, 0)`;
+    innerEl.style.transform = `translate3d(0, ${this.current.innerTranslate}px, 0)`;
   }
 
   animateTextOnScroll() {
     const scroll = window.scrollY;
     const containerTop =this.absoluteContainerTop;
     const viewportHeight = window.innerHeight;
-    const snap = 0.5;
+    const snap = 0.8;
 
     const isActive =
       scroll >= containerTop &&
@@ -191,10 +185,10 @@ private calculateDimensions() {
 
     if (isActive && !this.wasActive) {
       this.current = {
-        textTop: !this.isAnimated() ? 0 : this.animation() == 'text' ? 100 : 0,
+        textTranslate: !this.isAnimated() ? 0 : this.animation() == 'text' ? 100 : 0,
         textOpacity: this.isAnimated() ? 0 : 1,
         contentScale: this.animation() == 'zoom-out' ? 0 : this.animation() == 'zoom' ? 2 : 1,
-        innerTop: 0
+        innerTranslate: 0
       };
       this.target = { ...this.current };
     }
@@ -220,11 +214,11 @@ private calculateDimensions() {
       }
 
       if (this.exit() === 'reveal-exit') {
-        this.target.innerTop = -viewportHeight * unpinProgress;
+        this.target.innerTranslate = -viewportHeight * unpinProgress;
       }
     } else if (this.enter() === 'reveal-enter' || this.enter() === 'reveal-enter-top') {
       const containerHeight = viewportHeight * this.viewportMultiplier()
-      const totalPinDistance = containerHeight - viewportHeight; // 200vh
+      const totalPinDistance = containerHeight - viewportHeight;
 
       let minusviewport = this.enter() === 'reveal-enter' ? viewportHeight : 0;
       let totalProgress = (scroll - containerTop - minusviewport) / totalPinDistance;
@@ -239,7 +233,7 @@ private calculateDimensions() {
     } else {
 
       if (!this.isAnimated()) {
-        this.target.textTop = 0;
+        this.target.textTranslate = 0;
         this.target.textOpacity = 1;
         this.target.contentScale = 1;
         this.startRaf();
@@ -247,7 +241,7 @@ private calculateDimensions() {
       }
 
       const containerHeight = viewportHeight * this.viewportMultiplier();
-      const totalPinDistance = containerHeight - viewportHeight; // 100vh
+      const totalPinDistance = containerHeight - viewportHeight;
 
       let progress = (scroll - containerTop) / totalPinDistance;
       progress = Math.min(Math.max(progress, 0), 1);
@@ -267,13 +261,13 @@ private calculateDimensions() {
     if (this.animation() === 'zoom') {
       this.target.contentScale = Math.max(2 + (1 - 2) * progress, 0.01);
       this.target.textOpacity = progress;
-      this.target.textTop = 0;
+      this.target.textTranslate = 0;
     } else if (this.animation() === 'zoom-out') {
       this.target.contentScale = Math.max(progress, 0.01);
       this.target.textOpacity = progress;
-      this.target.textTop = 0;
+      this.target.textTranslate = 0;
     } else {
-      this.target.textTop = 100 * (1 - progress);
+      this.target.textTranslate = 100 * (1 - progress);
       this.target.contentScale = 1;
       this.target.textOpacity = progress;
     }

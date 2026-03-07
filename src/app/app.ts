@@ -7,6 +7,7 @@ import {
 } from './animated-slide-pinned-image-dragging-text/animated-slide-pinned-image-dragging-text.component';
 import {SwiperAnimComponent} from './swiper/swiper-anim.component';
 import {AnimatedSlidePanzoomComponent} from './animated-slide-panzoom/animated-slide-panzoom.component';
+import {AnimatedSlideIiifComponent} from './animated-slide-osd/animated-slide-osd.component';
 
 @Component({
   selector: 'app-root',
@@ -14,7 +15,8 @@ import {AnimatedSlidePanzoomComponent} from './animated-slide-panzoom/animated-s
   imports: [
     AnimatedSlideDraggingTextComponent,
     AnimatedSlidePinnedImageDraggingTextComponent,
-    AnimatedSlidePanzoomComponent
+    AnimatedSlidePanzoomComponent,
+    AnimatedSlideIiifComponent
   ],
   styleUrl: './app.css'
 })

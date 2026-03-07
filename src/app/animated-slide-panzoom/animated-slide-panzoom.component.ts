@@ -29,7 +29,6 @@ export class AnimatedSlidePanzoomComponent
     }
   );
 
-
   @HostBinding('style.--container-height')
   override get getContainerHeight() {
     return `${this.viewportMultiplier() * 100}vh`;
@@ -48,7 +47,7 @@ export class AnimatedSlidePanzoomComponent
   private animateSteps(scrollY: number, containerTop: number, viewportHeight: number) {
     if (!this.steps() || this.steps().length === 0) return 0;
 
-    const stepHeight = viewportHeight; // 100vh per step
+    const stepHeight = viewportHeight;
     const stepsCount = this.steps().length;
 
     let minusviewport = this.enter() === 'reveal-enter' ? viewportHeight : 0;
@@ -74,8 +73,10 @@ export class AnimatedSlidePanzoomComponent
       currentStep.y === prevStep.y &&
       currentStep.scale === prevStep.scale;
 
-    const panProgress = isStatic ? 1 : Math.min(stepProgress * 2, 1);       // 0 → 1 (first half)
-    const textProgress = isStatic ? stepProgress : Math.max((stepProgress - 0.5) * 2, 0); // 0 → 1 (second half)
+    //First half of step it pans and zooms
+    const panProgress = isStatic ? 1 : Math.min(stepProgress * 2, 1);
+    //Second half of step the text progresses
+    const textProgress = isStatic ? stepProgress : Math.max((stepProgress - 0.5) * 2, 0);
 
     const scale =
       prevStep.scale + (currentStep.scale - prevStep.scale) * panProgress;
