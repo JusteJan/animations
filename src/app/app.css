@@ -1,12 +1,12 @@
 .page-content {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* ensures at least viewport height */
+  min-height: 100vh;
 }
 
 .slides-container {
 
-  height: 100%;       /* match parent height */
+  height: 100%;
 }
 
 .menu {
