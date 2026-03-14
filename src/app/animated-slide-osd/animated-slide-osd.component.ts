@@ -1,4 +1,14 @@
-import {Component, ElementRef, ViewChild, AfterViewInit, input, computed, QueryList, ViewChildren} from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  ViewChild,
+  AfterViewInit,
+  input,
+  computed,
+  QueryList,
+  ViewChildren,
+  HostBinding
+} from '@angular/core';
 import { GenericAnimatedSlide } from '../animated-slide/generic-animated-slide';
 import OpenSeadragon from 'openseadragon';
 
@@ -48,10 +58,23 @@ export class AnimatedSlideIiifComponent extends GenericAnimatedSlide implements 
     return Math.max(1, stepsBase + transitionExtra - animatedAdjustment);
   });
 
-  protected getStepData(scrollY: number) {
-    const viewportHeight = window.innerHeight;
-    const containerTop = this.absoluteContainerTop;
-    const minusviewport = this.enter() === 'reveal-enter' ? viewportHeight : 0;
+  @HostBinding('style.--container-height')
+  override get getContainerHeight() {
+    return `${this.viewportMultiplier() * 100}vh`;
+  }
+
+  @HostBinding('style.--margin-reveal')
+  override get getMarginReveal() {
+    if (this.enter() === 'reveal-enter') {
+      return `-100vh`;
+    }
+
+    return null;
+  }
+
+  protected getStepData(scrollY: number, containerTop: number, viewportHeight: number) {
+    const isReveal = this.enter() === 'reveal-enter';
+    const minusviewport = isReveal ? viewportHeight : 0;
 
     const relativeScroll = scrollY - containerTop - minusviewport;
     if (relativeScroll < 0) return { index: 0, progress: 0 };
