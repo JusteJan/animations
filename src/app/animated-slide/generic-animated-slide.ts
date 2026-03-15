@@ -194,17 +194,14 @@ private calculateDimensions() {
     }
 
     this.wasActive = isActive;
+    const containerHeight = viewportHeight * this.viewportMultiplier();
+    const totalPinDistance = containerHeight - viewportHeight;
+    let minusviewport = this.enter() === 'reveal-enter' ? viewportHeight : 0;
+    let totalProgress = (scroll - containerTop - minusviewport) / totalPinDistance;
 
     if (this.exit() === 'reveal-exit' || this.exit() === 'reveal-top-exit') {
-      const containerHeight = viewportHeight * this.viewportMultiplier()
-      const totalPinDistance = containerHeight - viewportHeight;
-
-      let minusviewport = (this.enter() === 'reveal-enter' && this.exit() === 'reveal-exit') ? viewportHeight : (this.enter() === 'reveal-enter' && this.exit() === 'reveal-top-exit')? viewportHeight : 0;
-      let totalProgress = (scroll - containerTop - minusviewport) / totalPinDistance;
       let progresstimes = (this.enter() === 'reveal-enter'  && this.exit() === 'reveal-top-exit'  && this.isAnimated()) ? 2 : 1;
-
       totalProgress = Math.min(Math.max(totalProgress * progresstimes, 0), 1);
-
       let textProgress = Math.min(totalProgress * 2, 1);
       let animProgress = Math.min(textProgress / snap, 1);
       let unpinProgress = Math.min(Math.max((totalProgress - 0.5) * 2, 0), 1);
@@ -217,11 +214,6 @@ private calculateDimensions() {
         this.target.innerTranslate = -viewportHeight * unpinProgress;
       }
     } else if (this.enter() === 'reveal-enter' || this.enter() === 'reveal-enter-top') {
-      const containerHeight = viewportHeight * this.viewportMultiplier()
-      const totalPinDistance = containerHeight - viewportHeight;
-
-      let minusviewport = this.enter() === 'reveal-enter' ? viewportHeight : 0;
-      let totalProgress = (scroll - containerTop - minusviewport) / totalPinDistance;
       let progresstimes = this.enter() === 'reveal-enter' ? 2 : 1;
 
       const progress = Math.min(Math.max(totalProgress * progresstimes, 0), 1);
@@ -239,17 +231,11 @@ private calculateDimensions() {
         this.startRaf();
         return;
       }
+      totalProgress = Math.min(Math.max(totalProgress, 0), 1);
 
-      const containerHeight = viewportHeight * this.viewportMultiplier();
-      const totalPinDistance = containerHeight - viewportHeight;
-
-      let progress = (scroll - containerTop) / totalPinDistance;
-      progress = Math.min(Math.max(progress, 0), 1);
-
-      const animProgress = Math.min(progress / snap, 1);
+      const animProgress = Math.min(totalProgress / snap, 1);
 
       this.applyAnimationTargets(animProgress);
-
     }
 
     if (this.rafId === null) {
